@@ -11,6 +11,7 @@ from sklearn.metrics import classification_report, accuracy_score
 
 # Download NLTK resources
 nltk.download("punkt")
+nltk.download("punkt_tab")   
 nltk.download("stopwords")
 
 from nltk.corpus import stopwords
@@ -40,6 +41,12 @@ def train_model(dataset_path, model_name):
     # Clean text
     df["text"] = df["text"].astype(str).apply(clean_text)
 
+    # 🔥 ADD THIS BLOCK (BALANCING)
+    df = df.groupby('label').apply(
+        lambda x: x.sample(min(len(x), 2000))
+    ).reset_index(drop=True)
+
+    # Continue as usual
     X = df["text"]
     y = df["label"]
 
@@ -49,7 +56,10 @@ def train_model(dataset_path, model_name):
     )
 
     # TF-IDF
-    vectorizer = TfidfVectorizer(max_features=5000)
+    vectorizer = TfidfVectorizer(
+        max_features=5000,
+        ngram_range=(1,2)   # 🔥 IMPORTANT
+    )
     X_train_vec = vectorizer.fit_transform(X_train)
     X_test_vec = vectorizer.transform(X_test)
 
