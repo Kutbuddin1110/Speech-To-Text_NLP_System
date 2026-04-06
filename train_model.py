@@ -9,6 +9,8 @@ from tqdm import tqdm
 from rich.console import Console
 from rich.progress import track
 
+from visualize import plot_confusion_matrix, plot_confidence_hist, plot_confidence_box, plot_confidence_scatter
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -17,10 +19,10 @@ from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 
 # Download NLTK resources
-nltk.download("punkt")
-nltk.download("punkt_tab")   
-nltk.download("stopwords")
-nltk.download("wordnet")
+# nltk.download("punkt")
+# nltk.download("punkt_tab")   
+# nltk.download("stopwords")
+# nltk.download("wordnet")
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -63,7 +65,8 @@ def train_model(dataset_path, model_name):
 
     # Balance dataset
     df = df.groupby('label', group_keys=False).apply(
-        lambda x: x.sample(min(len(x), 2000))
+        lambda x: x.sample(min(len(x), 2000)),
+        include_groups=False
     ).reset_index(drop=True)
 
     steps = [
@@ -100,8 +103,15 @@ def train_model(dataset_path, model_name):
 
             # HYBRID MODEL SELECTION
             if model_name in ["emotion", "sentiment"]:
-                base_model = LinearSVC()
-                model = CalibratedClassifierCV(base_model)
+                base_model = LinearSVC(
+                    class_weight="balanced",
+                    C=1.5
+                )
+
+                model = CalibratedClassifierCV(
+                    base_model,
+                    cv=3
+                )
             else:
                 model = LogisticRegression(max_iter=1000)
 
@@ -118,6 +128,11 @@ def train_model(dataset_path, model_name):
     console.print("\n[magenta]Classification Report:[/magenta]\n")
     console.print(classification_report(y_test, y_pred, digits=4))
 
+    plot_confusion_matrix(model, X_test_vec, y_test, model_name)
+    plot_confidence_hist(model, X_test_vec, model_name)
+    plot_confidence_box(model, X_test_vec, model_name)
+    plot_confidence_scatter(model, X_test_vec, model_name)
+    
     # Save models
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, f"models/{model_name}.pkl")

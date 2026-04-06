@@ -10,6 +10,7 @@ df = pd.concat([df1, df2, df3], ignore_index=True)
 
 print("Total rows before filtering:", len(df))
 
+# Original GoEmotions labels
 target_emotions = [
     "admiration",
     "amusement",
@@ -52,6 +53,8 @@ clean_df = pd.DataFrame(rows)
 
 print("Rows after single-label filtering:", len(clean_df))
 
+# 6 EMOTION MAPPING 
+
 mapping = {
     # JOY
     "joy": "joy",
@@ -74,10 +77,8 @@ mapping = {
     # SURPRISE
     "confusion": "surprise",
 
-    # NEUTRAL
-    "neutral": "neutral",
-
-    # REMOVE (too vague / noisy)
+    # REMOVE THESE
+    "neutral": None,
     "approval": None,
     "curiosity": None
 }
@@ -88,10 +89,9 @@ clean_df["label"] = clean_df["label"].map(mapping)
 # Remove unwanted labels
 clean_df = clean_df.dropna(subset=["label"])
 
-print("Rows after mapping to 7 emotions:", len(clean_df))
-
+print("Rows after mapping to 6 emotions:", len(clean_df))
 
 # Save cleaned dataset
 clean_df.to_csv("data/emotion_dataset.csv", index=False)
 
-print("✅ emotion_dataset.csv created successfully (7 emotions)")
+print("Emotion_dataset.csv created successfully (6 emotions)")

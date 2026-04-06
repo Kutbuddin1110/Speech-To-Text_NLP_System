@@ -2,15 +2,13 @@ import random
 import pandas as pd
 import os
 
-# ------------------------------
 # CONFIG
-# ------------------------------
+
 OUTPUT_PATH = "data/intent_dataset.csv"
 SAMPLES_PER_INTENT = 2000
 
-# ------------------------------
 # SEED PHRASES
-# ------------------------------
+
 INTENT_SEEDS = {
     "greeting": [
         "hey", "hello", "hi", "hey bro", "yo", "good morning", "what's up"
@@ -56,18 +54,16 @@ INTENT_SEEDS = {
     ]
 }
 
-# ------------------------------
 # VARIATION HELPERS
-# ------------------------------
+
 prefixes = ["", "hey", "bro", "dude", "man", "please", "uh"]
 suffixes = ["", "please", "now", "quickly", "right now", "lol", ""]
 
 def generate_variation(text):
     return f"{random.choice(prefixes)} {text} {random.choice(suffixes)}".strip()
 
-# ------------------------------
 # DATA GENERATION
-# ------------------------------
+
 data = []
 
 for intent, phrases in INTENT_SEEDS.items():
@@ -76,21 +72,19 @@ for intent, phrases in INTENT_SEEDS.items():
         variation = generate_variation(base)
         data.append((variation, intent))
 
-# ------------------------------
 # CREATE DATAFRAME
-# ------------------------------
+
 df = pd.DataFrame(data, columns=["text", "label"])
 
 # Shuffle dataset
 df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-# ------------------------------
 # SAVE
-# ------------------------------
+
 os.makedirs("data", exist_ok=True)
 df.to_csv(OUTPUT_PATH, index=False)
 
-print("✅ Dataset generated successfully!")
-print("📊 Total samples:", len(df))
-print("\n🔹 Distribution:")
+print("Dataset generated successfully!")
+print("Total samples:", len(df))
+print("\nDistribution:")
 print(df["label"].value_counts())

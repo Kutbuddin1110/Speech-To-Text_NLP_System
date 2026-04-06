@@ -9,16 +9,18 @@ df = df.rename(columns={
     "sentiment": "label"
 })
 
-# Convert labels
+# Convert labels (kept for consistency)
 df["label"] = df["label"].map({
     "positive": "positive",
     "negative": "negative"
 })
 
-# Optional: reduce size (faster training)
-df = df.sample(20000, random_state=42)
+# remove duplicates
+df = df.drop_duplicates(subset=["text"])
+
+print("Total samples after cleaning:", len(df))
 
 # Save cleaned dataset
 df.to_csv("data/sentiment_dataset.csv", index=False)
 
-print("✅ IMDb dataset prepared!")
+print("IMDb dataset prepared using FULL dataset!")
