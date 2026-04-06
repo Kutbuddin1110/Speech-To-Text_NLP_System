@@ -57,7 +57,10 @@ def train_model(dataset_path, model_name):
     start_total = time.time()
 
     df = pd.read_csv(dataset_path)
-
+    df.columns = df.columns.str.strip()
+    print("COLUMNS:", list(df.columns))
+    print(df.head())
+    
     # Clean text with progress bar
     console.print("[cyan]🔹 Cleaning text data...[/cyan]")
     tqdm.pandas()
@@ -66,7 +69,7 @@ def train_model(dataset_path, model_name):
     # Balance dataset
     df = df.groupby('label', group_keys=False).apply(
         lambda x: x.sample(min(len(x), 2000)),
-        include_groups=False
+        # include_groups=False
     ).reset_index(drop=True)
 
     steps = [
