@@ -42,10 +42,26 @@ NEGATION_WORDS = {"not", "no", "never", "n't"}
 
 def clean_text(text):
     text = text.lower()
+
+    # ------------------------------
+    # 🔥 1. REMOVE POLITE PHRASES (SAFE)
+    # ------------------------------
+    text = re.sub(
+        r'\b(thank you|thanks|thanks a lot|thank you so much|appreciate it)\b',
+        ' ',
+        text
+    )
+
+    # ------------------------------
+    # 🔹 2. BASIC CLEANING
+    # ------------------------------
     text = re.sub(r'[^a-zA-Z ]', '', text)
 
     tokens = word_tokenize(text)
 
+    # ------------------------------
+    # 🔥 3. NEGATION HANDLING (KEEP)
+    # ------------------------------
     processed_tokens = []
     negation = False
     window = 0
@@ -66,14 +82,16 @@ def clean_text(text):
         if window == 0:
             negation = False
 
-    tokens = [
+    # ------------------------------
+    # 🔹 4. STOPWORDS + LEMMATIZATION
+    # ------------------------------
+    final_tokens = [
         lemmatizer.lemmatize(w)
         for w in processed_tokens
         if w not in stop_words and len(w) > 2
     ]
 
-    return " ".join(tokens)
-
+    return " ".join(final_tokens)
 # GENERIC TRAINING FUNCTION
 
 def train_model(dataset_path, model_name):
